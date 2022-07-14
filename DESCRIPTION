@@ -1,0 +1,32 @@
+Package: SurvMaximin
+Type: Package
+Title: SurvMaximin: Robust Federated Approach to Transporting Survival Risk Prediction Models
+Version: 0.1.0
+Author: Harrison Zhang, Xuan Wang
+Maintainer: Xin Xiong <xinxiong@hsph.harvard.edu>
+Description: For multi-center heterogeneous Real World Data (RWD) with time-to-event outcomes and 
+    high-dimensional features, this package provides the SurvMaximin algorithm to estimate Cox model feature
+    coefficients for a target population by borrowing summary information from a set of health care centers
+    without sharing patient-level information. For each of the centers from which we want to borrow information
+    to improve the prediction performance for the target population, a penalized Cox model is fitted to estimate
+    feature coefficients for the center. Using estimated feature coefficients and the covariance matrix of the 
+    target population, it then obtains a SurvMaximin estimated set of feature coefficients for the target population.
+    The target population can be an entire cohort comprised of all centers, corresponding to federated learning, or
+    can be a single center, corresponding to transfer learning.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    CVXR,
+    glmnet,
+    MASS,
+    survC1,
+    survival,
+    ggplot2
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

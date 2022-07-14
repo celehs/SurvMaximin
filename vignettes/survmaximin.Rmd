@@ -1,0 +1,90 @@
+---
+title: "survmaximin"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{survmaximin}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+To illustrate the usage of the SurvMaximin algorithm, first load in the simulated data, which includes a coefficient matrix derived locally from each source site and a varable covariance matrix from one target site. 
+
+```{r setup}
+library(SurvMaximin)
+data(B_source); dim(B_source)
+data(Sigma_target); dim(Sigma_target)
+```
+
+Then we fit the SurvMaximin model by calling the `survmaximin` function. Note that the $delta$ parameter controls the ridge penalty with the default value as 0. The transfer-learning coefficients are saved as `beta.est` in the output list. Weights for each source site are stored as `weight`, as well.
+
+```{r}
+output <- survmaximin(B_source, Sigma_target, delta=0.5)
+output$beta.est
+output$weight
+```
+
+
+To evaluate the performance of the SurvMaximin model, we first import the validation dataset.
+
+
+```{r}
+data(x.valid); length(x.valid)
+data(z.valid); dim(z.valid)
+data(delta.valid); length(delta.valid)
+```
+We can use `Est.Cval` function in the `survC1` package to calculate the C statistics from the validation data set and evaluate the model performance.
+
+```{r}
+valid.dat <- data.frame(`t_to_event_` = x.valid,
+                        `death_ind` = delta.valid,
+                        `score` = z.valid %*% output$beta.est)
+c.maximin <- survC1::Est.Cval(valid.dat, tau = 5)$Dhat
+c.maximin
+```
+
+
+If all sites can be treated as the target site and each site demands a SurvMaximin model to be fitted, then users can first store the locally estimated coefficients in one matrix ($p\times L$ where $L$ denotes the total number of sites), and data covariance matrices into a list：
+
+
+```{r}
+data(B_all); dim(B_all)
+data(Sigma_all)
+length(Sigma_all); dim(Sigma_all[[1]])
+
+```
+```{r}
+output <- survmaximin_fed(B_all, Sigma_all, delta=0.5)
+length(output)
+output[[1]]$beta.est
+output[[1]]$weight
+
+```
+
+
+To visualize the estimated results and inspect the sparsity of the estimators, we show the density plot for the survmaximin coefficient of each covariate from all sites as below. 
+
+```{r fig.height=6, fig.width=7}
+library(ggplot2)
+beta.all = c()
+p = 25; L = 16
+for(i in 1:L){
+  for(j in 1:p){
+    beta.all = rbind(beta.all, 
+                     data.frame(`variable` = paste0('covar',j), `site` = i, `maximin_coeff` = output[[i]]$beta.est[j]))
+  }
+}
+beta.all$variable = factor(beta.all$variable, levels = paste0('covar', 1:25))
+
+ggplot(beta.all, ggplot2::aes(x = maximin_coeff)) +
+  geom_density() +
+  xlim(c(-0.2, 0.2)) +
+  geom_vline(xintercept = 0, col = 'red', linetype = 2) +
+  facet_wrap(.~variable, scales = 'free_y')
+```
