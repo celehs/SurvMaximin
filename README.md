@@ -7,19 +7,21 @@
 
 <!-- badges: end -->
 
-The goal of SurvMaximin is to …
+For multi-center heterogeneous Real-World Data (RWD) with time-to-event
+outcomes and high-dimensional features, we propose the SurvMaximin
+algorithm to estimate Cox model feature coefficients for a target
+population by borrowing summary information from a set of health care
+centers without sharing patient-level information.
 
 ## Installation
 
 You can install the development version of SurvMaximin like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("celehs/SurvMaximin")
 ```
 
 ## Example
-
-This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(SurvMaximin)
